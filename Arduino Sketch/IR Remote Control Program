@@ -1,0 +1,93 @@
+#include <IRremote.h>
+
+int IRpin = 9;
+IRrecv IR(IRpin);
+decode_results results;
+
+// MOTOR 1
+int speedPin = 5;
+int dir1 = 4;
+int dir2 = 3;
+int mSpeed;
+
+
+// MOTOR 2
+int twospeedPin = 13;
+int twodir1 = 12;
+int twodir2 = 11;
+int twomSpeed;
+
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(speedPin,OUTPUT);
+  pinMode(dir1,OUTPUT);
+  pinMode(dir2,OUTPUT);
+
+  pinMode(twospeedPin,OUTPUT);
+  pinMode(twodir1,OUTPUT);
+  pinMode(twodir2,OUTPUT);
+  Serial.begin(9600);
+
+  IR.enableIRIn();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  while (IR.decode(&results) == 0) {
+  }
+ 
+  if (results.value == 0x59 || results.value == 0x10059) {                  // DOWN
+    mSpeed = twomSpeed = 255;
+    analogWrite(speedPin,mSpeed);
+    digitalWrite(dir1,LOW);
+    digitalWrite(dir2,HIGH);
+
+    analogWrite(twospeedPin,twomSpeed);
+    digitalWrite(twodir1,LOW);
+    digitalWrite(twodir2,HIGH);
+  }
+
+
+
+  else if (results.value == 0x58 || results.value == 0x10058) {            // UP
+    mSpeed = twomSpeed = 255;
+
+    analogWrite(speedPin,mSpeed);
+    digitalWrite(dir1,HIGH);
+    digitalWrite(dir2,LOW);
+
+    analogWrite(twospeedPin,twomSpeed);
+    digitalWrite(twodir1,HIGH);
+    digitalWrite(twodir2,LOW);
+  }
+
+
+  else if (results.value == 0x5a || results.value == 0x1005a) {            // LEFT
+    mSpeed = 0;
+    analogWrite(speedPin,mSpeed);
+
+    twomSpeed = 255;
+    analogWrite(twospeedPin,twomSpeed);
+    digitalWrite(twodir1,HIGH);
+    digitalWrite(twodir2,LOW);
+  }
+
+  else if (results.value == 0x5b || results.value == 0x1005b) {            // RIGHT
+    mSpeed = 255;
+    analogWrite(speedPin,mSpeed);
+    digitalWrite(dir1,HIGH);
+    digitalWrite(dir2,LOW);
+
+    twomSpeed = 0;
+    analogWrite(twospeedPin,twomSpeed);
+  }
+  
+  else if (results.value == 0x5c || 0x1005c) {
+    analogWrite(speedPin,0);
+    analogWrite(twospeedPin,0);
+  }
+  
+  IR.resume();
+}
